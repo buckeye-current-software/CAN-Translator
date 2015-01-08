@@ -11,6 +11,8 @@ tree *signal_tree;
 const int canfd_on = 1;
 int keepRunning = 1;
 
+struct can_queue can_read_queue;
+
 int * can_interceptor_thread(int s)
 {
 	fd_set rdfs;
@@ -47,6 +49,9 @@ int * can_interceptor_thread(int s)
 	msg.msg_iovlen = 1;
 	msg.msg_control = &ctrlmsg;
 
+	struct message_node msg_node_key;
+	struct message_node *result_node;
+
 	while(keepRunning){
 		FD_ZERO(&rdfs);
 		FD_SET(s, &rdfs);
@@ -62,12 +67,13 @@ int * can_interceptor_thread(int s)
 			if (nbytes < sizeof(struct can_frame))
 			{
 				fprintf(stderr, "read: incomplete CAN frame\n");
-				return 1;
 			}
 			if (nbytes < 0)
 			{
 				perror("Close socket?");
 				close(s);
+
+				// DETERMINE WAY TO HANDLE CLOSING OTHER THREADS...
 				/*
 				pthread_join(txthread, NULL);
 				pthread_join(logging, NULL);
@@ -79,9 +85,30 @@ int * can_interceptor_thread(int s)
 			}
 			if (nbytes > 0)
 			{
-				//printf("%lu\n", msgsRecv);	// Debugging the receiving of messages from CAN bus.
-				//msgsRecv++;
-				translate(msg_tree, signal_tree, &frame);
+				/* Successfully read CAN message. Obtain CAN ID, find message node that has that ID in the tree and assign
+				 * CAN frame to it for processing by another thread.
+				 */
+				msg_node_key.key = (int)frame.can_id;
+				result_node = get_message(msg_tree, &msg_node_key, sizeof(struct message_node));
+
+				// This probably isn't necessarily now.
+				result_node->data = frame;
+
+				// Add message node pointer to queue that allows another thread to find it quickly to translate.
+				// QUEUE CODE HERE...
+				struct can_message *msg = malloc(sizeof(struct can_message));
+				msg->frame = &frame;
+				msg->next = NULL;
+				msg->can_signals = result_node->list;
+				if(can_read_queue.head == NULL)
+				{
+					can_read_queue.head = msg;
+					can_read_queue.tail = msg;
+				}
+				else
+				{
+					can_read_queue.tail->next = msg;
+				}
 			}
 		}
 	}
