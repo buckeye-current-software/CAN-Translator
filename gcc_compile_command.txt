@@ -1,0 +1,1 @@
+gcc avl.c datalogger.c LinkedList.c parser.c SignalAVL.c MessageAVL.c translator.c main.c -o main -DAF_CAN=PF_CAN -DPF_CAN=29 -DSO_RXQ_OVFL=40 -fno-strict-aliasing -Iinclude -Wno-parentheses -Wall -O2
