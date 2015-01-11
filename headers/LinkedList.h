@@ -19,11 +19,24 @@ struct list_node
   struct list_node* next;
 };
 
+struct can_message
+{
+	struct canfd_frame * frame;
+	struct can_message * next;
+	struct my_list * can_signals;
+};
+
 
 struct my_list
 {
   struct list_node* head;
   struct list_node* tail;
+};
+
+struct can_queue
+{
+	struct can_message * head;
+	struct can_message * tail;
 };
 
 

@@ -12,6 +12,7 @@ struct message_node {
     int key;
     char name[50];
     struct my_list *list;
+    struct canfd_frame data;
     int log_mode;
     int count;
 };
