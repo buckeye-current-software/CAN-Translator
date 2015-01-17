@@ -42,7 +42,7 @@
 #include <linux/can/error.h>
 
 
-#include "include/socketcan/can.h"
+//#include "socketcan/can.h"
 #include "lib.h"
 #include "parser.h"
 #include "avl.h"
@@ -54,6 +54,8 @@
 #include "syslog.h"
 #include "signal.h"
 
+#include "can_interceptor.h"
 
+//#include <mysql/mysql.h>
 
 #endif /* ALL_H_ */
