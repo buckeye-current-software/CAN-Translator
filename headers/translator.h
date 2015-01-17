@@ -10,6 +10,8 @@
 
 #include "avl.h"
 
+void * translate_thread();
+
 /*
  * Translates a can frame and stores the translated values into the correct
  * signals to be datalogged later

@@ -78,16 +78,7 @@ void *logthread()
 	return NULL;
 }
 
-void *syncthread()
-{
-	while(keepRunning)
-	{
-		fsync(fileno(f));
-		sleep(2);
-	}
-	return NULL;
 
-}
 int main()
 {
 	int s;
@@ -114,13 +105,13 @@ int main()
 	sem_init(&semaphore, 0, 1);
 	sem_init(&can_semaphore, 0, 1);
 
-	pthread_t interceptor;
-	pthread_t txthread, logging, sync;
+	pthread_t interceptor, translator;
+	pthread_t txthread, logging;
 	pthread_create(&interceptor, NULL, can_interceptor_thread, s);
+	pthread_create(&translator, NULL, translate_thread, NULL);
 	pthread_create(&txthread, NULL, txcanthread, s);
 	pthread_create(&logging, NULL, logthread, NULL);
 	sleep(2);
-	pthread_create(&sync, NULL, syncthread, NULL);
 
 	return 0;
 }

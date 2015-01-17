@@ -6,6 +6,7 @@
  */
 
 #include "all.h"
+
 tree *msg_tree;
 tree *signal_tree;
 const int canfd_on = 1;
@@ -89,6 +90,7 @@ int * can_interceptor_thread(int s)
 				 * CAN frame to it for processing by another thread.
 				 */
 				msg_node_key.key = (int)frame.can_id;
+				// Need to check if result_node is NULL or if this is valid if the msg doesn't exist in tree...
 				result_node = get_message(msg_tree, &msg_node_key, sizeof(struct message_node));
 
 				// This probably isn't necessarily now.
