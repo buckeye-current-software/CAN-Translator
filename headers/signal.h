@@ -20,6 +20,7 @@ struct signal_structure
 	int byteOrder;
 	int dataType;
 	char unit[25];
+	struct signal_structure * next;
 };
 
 #endif // SIGNAL_H_
