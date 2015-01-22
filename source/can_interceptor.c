@@ -26,7 +26,7 @@ int * can_interceptor_thread(int s)
 	struct sockaddr_can addr;
 	struct ifreq ifr;
 
-	strcpy(ifr.ifr_name, "can0" );
+	strcpy(ifr.ifr_name, "vcan0" );
 	ioctl(s, SIOCGIFINDEX, &ifr);
 	addr.can_family = AF_CAN;
 	addr.can_ifindex = ifr.ifr_ifindex;
@@ -92,24 +92,26 @@ int * can_interceptor_thread(int s)
 				msg_node_key.key = (int)frame.can_id;
 				// Need to check if result_node is NULL or if this is valid if the msg doesn't exist in tree...
 				result_node = get_message(msg_tree, &msg_node_key, sizeof(struct message_node));
-
-				// This probably isn't necessarily now.
-				result_node->data = frame;
-
-				// Add message node pointer to queue that allows another thread to find it quickly to translate.
-				// QUEUE CODE HERE...
-				struct can_message *msg = malloc(sizeof(struct can_message));
-				msg->frame = &frame;
-				msg->next = NULL;
-				msg->can_signals = result_node->list;
-				if(can_read_queue.head == NULL)
+				if(result_node != NULL)
 				{
-					can_read_queue.head = msg;
-					can_read_queue.tail = msg;
-				}
-				else
-				{
-					can_read_queue.tail->next = msg;
+					// This probably isn't necessarily now.
+					//result_node->data = frame;
+
+					// Add message node pointer to queue that allows another thread to find it quickly to translate.
+					// QUEUE CODE HERE...
+					struct can_message *msg = malloc(sizeof(struct can_message));
+					msg->frame = &frame;
+					msg->next = NULL;
+					msg->can_signals = result_node->list;
+					if(can_read_queue.head == NULL)
+					{
+						can_read_queue.head = msg;
+						can_read_queue.tail = msg;
+					}
+					else
+					{
+						can_read_queue.tail->next = msg;
+					}
 				}
 			}
 		}

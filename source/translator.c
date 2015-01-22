@@ -23,7 +23,7 @@ union byteData
 
 extern sem_t semaphore;
 extern struct can_queue can_read_queue;
-extern struct can_queue translated_queue;
+struct can_queue translated_queue;
 extern int keepRunning;
 
 void * translate_thread()
