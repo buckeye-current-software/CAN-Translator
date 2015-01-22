@@ -94,7 +94,7 @@ int main()
 	msg_tree = initialize_msg_avl();		// Initialize trees that will store parsed data from .dbc file
 	signal_tree = initialize_signal_avl();
 
-	char *fileName = "/home/cancorder/IOM2014.dbc";			// Your .dbc file
+	char *fileName = "/home/cancorder/workspace/CAN_Translator/IOM2014.dbc";			// Your .dbc file
 	//char *fileName = "IOM2014.dbc";
 	parseFile(fileName);	// Parse the file
 
@@ -112,6 +112,11 @@ int main()
 	pthread_create(&txthread, NULL, txcanthread, s);
 	pthread_create(&logging, NULL, logthread, NULL);
 	sleep(2);
+
+	while(1)
+	{
+		//Do nothing
+	}
 
 	return 0;
 }
