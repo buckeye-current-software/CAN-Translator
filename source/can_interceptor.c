@@ -14,6 +14,8 @@ int keepRunning = 1;
 
 struct can_queue can_read_queue;
 
+extern sem_t semaphore;
+
 int * can_interceptor_thread(int s)
 {
 	fd_set rdfs;
@@ -103,6 +105,7 @@ int * can_interceptor_thread(int s)
 					msg->frame = &frame;
 					msg->next = NULL;
 					msg->can_signals = result_node->list;
+					sem_wait(&semaphore);
 					if(can_read_queue.head == NULL)
 					{
 						can_read_queue.head = msg;
@@ -112,6 +115,7 @@ int * can_interceptor_thread(int s)
 					{
 						can_read_queue.tail->next = msg;
 					}
+					sem_post(&semaphore);
 				}
 			}
 		}

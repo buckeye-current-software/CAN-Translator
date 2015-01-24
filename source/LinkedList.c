@@ -106,6 +106,7 @@ struct my_list* list_remove_element( struct my_list* s )
    
  
 /* ---------------------- small helper fucntions ---------------------------------- */
+/*
 struct my_list* list_free( struct my_list* s )
 {
   while( s->head )
@@ -115,7 +116,8 @@ struct my_list* list_free( struct my_list* s )
  
   return s;
 }
- 
+*/
+
 struct my_list* list_new(void)
 {
   struct my_list* p = malloc( 1 * sizeof(*p)); // Should work, may switch to malloc(sizeof(struct my_list)) later

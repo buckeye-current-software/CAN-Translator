@@ -46,7 +46,7 @@ struct my_list* list_remove_element( struct my_list*);
 
 
 struct my_list* list_new(void);
-struct my_list* list_free( struct my_list* );
+//struct my_list* list_free( struct my_list* );
 
 void list_print( const struct my_list* );
 void list_print_element(const struct list_node* );
