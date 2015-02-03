@@ -69,9 +69,9 @@ int main()
 	sigaction(SIGINT, &sigIntHandler, NULL);
 	 */
 	msg_tree = initialize_msg_avl();		// Initialize trees that will store parsed data from .dbc file
-	signal_tree = initialize_signal_avl();
+	//signal_tree = initialize_signal_avl();
 
-	char *fileName = "/home/cancorder/workspace/CAN_Translator/IOM2014.dbc";			// Your .dbc file
+	char *fileName = "/home/cancorder/workspace/CAN_Translator/RW3.dbc";			// Your .dbc file
 	//char *fileName = "IOM2014.dbc";
 	parseFile(fileName);	// Parse the file
 

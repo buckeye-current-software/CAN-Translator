@@ -182,6 +182,7 @@ void * translate_thread()
 					signal = head_signal->next->signal;
 				}
 
+				/*
 				if(translated_queue.head == NULL)
 				{
 					translated_queue.head = can_message_to_translate;
@@ -192,9 +193,9 @@ void * translate_thread()
 					translated_queue.tail->next = can_message_to_translate;
 					translated_queue.tail = can_message_to_translate;
 				}
-
-				sprintf(mysql_statement, "INSERT INTO CANTime values (1, '%s', 'none',  %f)",
-						head_signal->signal->id, head_signal->value);
+				*/
+				sprintf(mysql_statement, "INSERT INTO CANTime values (1, '%s', '%s',  %f)",
+						head_signal->signal->id, head_signal->signal->unit, head_signal->value);
 
 				if(mysql_query(con, mysql_statement) != 0)
 				{
