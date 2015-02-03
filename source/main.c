@@ -14,6 +14,7 @@ FILE *f;
 char logString[150];
 unsigned int errors = 0;
 extern int keepRunning;
+time_t startTime;
 
 void my_handler(int dummy) {
     keepRunning = 0;
@@ -42,6 +43,7 @@ void *txcanthread(int cansock) {
 
 int main()
 {
+	startTime = time(0);
 	int s;
 	printf("MySQL client version: %s\n", mysql_get_client_info());
 

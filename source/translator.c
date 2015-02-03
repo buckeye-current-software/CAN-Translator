@@ -26,6 +26,7 @@ extern struct can_queue can_read_queue;
 struct can_queue translated_queue;
 extern int keepRunning;
 extern MYSQL * con;
+extern time_t startTime;
 char mysql_statement[200];
 
 void * translate_thread()
@@ -194,7 +195,7 @@ void * translate_thread()
 					translated_queue.tail = can_message_to_translate;
 				}
 				*/
-				sprintf(mysql_statement, "INSERT INTO CANTime values (1, '%s', '%s',  %f)",
+				sprintf(mysql_statement, "INSERT INTO CANTime values ('%f', '%s', '%s',  %f)", difftime(time(0),startTime),
 						head_signal->signal->id, head_signal->signal->unit, head_signal->value);
 
 				if(mysql_query(con, mysql_statement) != 0)
