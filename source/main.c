@@ -9,7 +9,6 @@
 MYSQL *con;
 
 tree *msg_tree;
-tree *signal_tree;
 sem_t semaphore, can_semaphore;
 FILE *f;
 char logString[150];

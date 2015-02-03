@@ -6,10 +6,8 @@
 C_SRCS += \
 ../source/LinkedList.c \
 ../source/MessageAVL.c \
-../source/SignalAVL.c \
 ../source/avl.c \
 ../source/can_interceptor.c \
-../source/datalogger.c \
 ../source/lib.c \
 ../source/main.c \
 ../source/parser.c \
@@ -18,10 +16,8 @@ C_SRCS += \
 OBJS += \
 ./source/LinkedList.o \
 ./source/MessageAVL.o \
-./source/SignalAVL.o \
 ./source/avl.o \
 ./source/can_interceptor.o \
-./source/datalogger.o \
 ./source/lib.o \
 ./source/main.o \
 ./source/parser.o \
@@ -30,10 +26,8 @@ OBJS += \
 C_DEPS += \
 ./source/LinkedList.d \
 ./source/MessageAVL.d \
-./source/SignalAVL.d \
 ./source/avl.d \
 ./source/can_interceptor.d \
-./source/datalogger.d \
 ./source/lib.d \
 ./source/main.d \
 ./source/parser.d \
