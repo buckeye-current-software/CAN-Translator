@@ -6,7 +6,6 @@
 #include "all.h"
 
 extern tree *msg_tree;
-extern tree *signal_tree;
 int maxSignalSize;
 
 void parseFile(char *fileName)
@@ -29,8 +28,8 @@ void parseFile(char *fileName)
 	struct my_list* signal_linked_list = NULL; 	// Linked list of signals all in a single message
 	struct message_node msg, tempNode;
 	struct message_node * msgnode_to_edit;
-	struct signal_node sig_node;				// The nodes that will go into the signal AVL tree
-	struct signal_node * signode_to_edit;		// Signal nodes that are edited after in tree
+	struct list_node * signode_to_edit;
+	struct message_node * message;		// Signal nodes that are edited after in tree
 	struct signal_structure sig; 				// An actual signal structure
 	
 	/* Read a line in at a time */
@@ -68,7 +67,62 @@ void parseFile(char *fileName)
 			msg.log_mode = 0;
 			signal_linked_list = list_new();
 		}
-		if(strstr(buf, "SG_") != NULL)
+
+		else if(strstr(buf, "CM_ SG_") != NULL)
+		{
+			msg.list = signal_linked_list; //Getting a warning before about "assignment from incompatible pointer type"
+			insert_elmt(msg_tree, &msg, sizeof(struct message_node));
+
+			int id = 0;
+			index = 8;
+			while(buf[index] != ' ')
+			{
+				tmp[index-8] = buf[index];
+				index++;
+			}
+			tmp[index-8] = '\0';
+			id = atoi(tmp);
+			tempNode.key = id;
+			index += 1;
+			index2 = 0;
+			while(buf[index] != ' ')
+			{
+				tmp[index2] = buf[index];
+				index++;
+				index2++;
+			}
+			tmp[index2] = '\0';
+
+			msgnode_to_edit = get_message(msg_tree, &tempNode, sizeof(struct message_node));
+			signode_to_edit = msgnode_to_edit->list->head;
+			while(strcmp(signode_to_edit->signal->id,tmp) != 0)
+			{
+				signode_to_edit = signode_to_edit->next;
+			}
+			index += 2;
+			index2 = 0;
+			while(buf[index] != ',')
+			{
+				tmp[index2] = buf[index];
+				index++;
+				index2++;
+			}
+			tmp[index2] = '\0';
+			signode_to_edit->signal->warnStart = atoi(tmp);
+
+			index ++;
+			index2 = 0;
+			while(buf[index] != ']')
+			{
+				tmp[index2] = buf[index];
+				index++;
+				index2++;
+			}
+			tmp[index2] = '\0';
+			signode_to_edit->signal->warnEnd = atoi(tmp);
+		}
+
+		else if(strstr(buf, "SG_") != NULL)
 		{
 			index = 5;
 			index2 = 0;
@@ -86,11 +140,9 @@ void parseFile(char *fileName)
 			{
 				maxSignalSize = tmpLength;
 			}
-			sig_node.signal = malloc(sizeof(struct signal_structure));
 
 			sig.unit[0] = '\0';
 			strcpy(sig.id, tmp);
-			strcpy(sig_node.key, tmp);
 			
 			// Move index +3 to skip useless dbc formatting stuff
 			index = index + 3;
@@ -140,6 +192,32 @@ void parseFile(char *fileName)
 				sig.dataType = 2; // Represents unsigned int
 			}
 
+			// Move to the signal's min, max value and store it
+			while(buf[index] != '[')
+			{
+				index ++;
+			}
+			index ++;
+			index2 = 0;
+			while(buf[index] != '|')
+			{
+				tmp[index2] = buf[index];
+				index2++;
+				index++;
+			}
+			tmp[index2] = '\0';
+			sig.okStart = atoi(tmp);
+
+			index++;
+			index2 = 0;
+			while(buf[index] != ']')
+			{
+				tmp[index2] = buf[index];
+				index2++;
+				index++;
+			}
+			tmp[index2] = '\0';
+			sig.okEnd = atoi(tmp);
 			// Move to the signal's unit and store it
 			while(buf[index] != '"')
 			{
@@ -160,27 +238,28 @@ void parseFile(char *fileName)
 				strcpy(sig.unit, tmp);
 			}
 
-			// Set default value of node to 0
-			sig_node.value = 0;
 			// Add signal to linked_list
-			sig_node.signal = list_add_element(signal_linked_list, &sig);
+			list_add_element(signal_linked_list, &sig);
 
-			fprintf(stdout, "Inserting node into signal tree \n");
 			// Add signal to signal node, add signal node to AVL tree
-			insert_elmt(signal_tree, &sig_node, sizeof(struct signal_node));
 		}
 
 		// This signifies that the data type for a signal stored earlier is wrong
-		if(strstr(buf, "SIG_VALTYPE_ ") != NULL)
+		else if(strstr(buf, "SIG_VALTYPE_ ") != NULL)
 		{
 			int nameIndex = 0;
 			index = 13;
+			index2 = 0;
 			while(buf[index] != ' ')
 			{
+				tmp[index2] = buf[index];
 				index++;
+				index2++;
 			}
+			tmp[index2] = '\0';
+			tempNode.key = atoi(tmp);
+
 			index++;
-			memset(tmp,0,strlen(tmp));
 			while(buf[index] != ' ')
 			{
 				tmp[nameIndex] = buf[index];
@@ -188,9 +267,15 @@ void parseFile(char *fileName)
 				nameIndex++;
 			}
 			tmp[nameIndex] = '\0';
-			strcpy(sig_node.key, tmp);
+			//strcpy(sig_node.key, tmp);
+			//signode_to_edit = get_signal(signal_tree, &sig_node, sizeof(struct signal_node));
+			message = get_message(msg_tree, &tempNode,sizeof(struct message_node));
+			signode_to_edit = message->list->head;
+			while(strcmp(signode_to_edit->signal->id,tmp) != 0) // This is not right.
+			{
+				signode_to_edit = signode_to_edit->next;
+			}
 
-			signode_to_edit = get_signal(signal_tree, &sig_node, sizeof(struct signal_node));
 			index = index + 3;
 			if(buf[index] == '1') 	//Change data type to float
 			{
@@ -201,44 +286,7 @@ void parseFile(char *fileName)
 				signode_to_edit->signal->dataType = 4;
 			}
 		}
-		if(strstr(buf, "CM_ BO_") != NULL)
-		{
-			int id = 0;
-			index = 8;
-			while(buf[index] != ' ')
-			{
-				tmp[index-8] = buf[index];
-				index++;
-			}
-			tmp[index-8] = '\0';
-			id = atoi(tmp);
-			tempNode.key = id;
-			index += 2;
-			index2 = 0;
-			while(buf[index] != '"')
-			{
-				tmp[index2] = buf[index];
-				index++;
-				index2++;
-			}
-			tmp[index2] = '\0';
 
-			if(msg.key != id)
-			{
-				msgnode_to_edit = get_message(msg_tree, &tempNode, sizeof(struct message_node));
-				if(strstr(tmp, "increment") != NULL)
-				{
-					msgnode_to_edit->log_mode = 1; // 1 signifies to increment message count each time received
-				}
-			}
-			else
-			{
-				if(strstr(tmp, "increment") != NULL)
-				{
-					msg.log_mode = 1;
-				}
-			}
-		}
 	}
 	// Insert last message node into the message tree
 	msg.list = signal_linked_list;
@@ -246,7 +294,5 @@ void parseFile(char *fileName)
 
 	fprintf(stdout, "Message Tree: \n"); // Used for debugging. Make sure everything is in the tree
 	print_tree(msg_tree);
-	fprintf(stdout, "Signal Tree: \n");
-	print_tree(signal_tree);
 	fclose(file);
 }

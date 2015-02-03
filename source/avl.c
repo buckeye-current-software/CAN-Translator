@@ -672,7 +672,16 @@ void print_tree_recur(node t, void (*data_print) (void *))
         unsigned i = 0;
         for (i = 0; i < t->height; i++)
             printf(" ");
-        printf("[%d|%p]", t->height, t);
+        struct message_node* node = (struct message_node*)(t->data);
+        printf("[%d|%p]\n", node->key, t);
+        struct list_node * l_node = node->list->head;
+        while (l_node != NULL)
+        {
+        	printf("Signal: %s, OkStart: %d, OkEnd: %d, WarnStart: %d, WarnEnd: %d, Unit: %s \n", l_node->signal->id, l_node->signal->okStart,
+        			l_node->signal->okEnd, l_node->signal->warnStart, l_node->signal->warnEnd, l_node->signal->unit);
+        	l_node = l_node->next;
+        }
+        fflush(stdout);
         data_print(t->data);
         printf("\n");
     }

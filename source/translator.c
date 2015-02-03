@@ -25,6 +25,8 @@ extern sem_t semaphore;
 extern struct can_queue can_read_queue;
 struct can_queue translated_queue;
 extern int keepRunning;
+extern MYSQL * con;
+char mysql_statement[200];
 
 void * translate_thread()
 {
@@ -41,8 +43,10 @@ void * translate_thread()
 		if(can_read_queue.head != NULL)
 		{
 			// Add semaphore to lock down the queue while these two operations occur
+			sem_wait(&semaphore);
 			can_message_to_translate = can_read_queue.head;
 			can_read_queue.head = can_message_to_translate->next;
+			sem_post(&semaphore);
 
 			frame = can_message_to_translate->frame;
 			frameLength = frame->len;
@@ -50,7 +54,7 @@ void * translate_thread()
 			__u8 origFrameData[frameLength];
 
 			//Why frame->data[0]
-			memcpy(&origFrameData, frame->data[0], frameLength);
+			memcpy(&origFrameData, frame->data, frameLength);
 
 			struct list_node* head_signal = can_message_to_translate->can_signals->head;
 			signal = head_signal->signal;
@@ -177,17 +181,31 @@ void * translate_thread()
 				{
 					signal = head_signal->next->signal;
 				}
-				head_signal = head_signal->next;
 
+				/*
 				if(translated_queue.head == NULL)
 				{
 					translated_queue.head = can_message_to_translate;
+					translated_queue.tail = can_message_to_translate;
 				}
 				else
 				{
 					translated_queue.tail->next = can_message_to_translate;
 					translated_queue.tail = can_message_to_translate;
 				}
+				*/
+				sprintf(mysql_statement, "INSERT INTO CANTime values (1, '%s', '%s',  %f)",
+						head_signal->signal->id, head_signal->signal->unit, head_signal->value);
+
+				if(mysql_query(con, mysql_statement) != 0)
+				{
+				      printf("MySQL query error : %s\n", mysql_error(con));
+				}
+				fflush(stdout);
+				/*
+				 * Temporary code
+				 */
+				head_signal = head_signal->next;
 			}
 		}
 	}

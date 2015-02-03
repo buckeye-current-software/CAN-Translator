@@ -29,7 +29,7 @@ void data_delete_msg(void *d)
     struct message_node *dd = (struct message_node *) d;
 
     if (dd) {
-    	list_free(dd->list);
+    	//list_free(dd->list);
     	free(dd->list);
     	dd->list = NULL;
         free(dd);

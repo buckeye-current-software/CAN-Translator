@@ -27,6 +27,7 @@
 							<tool id="cdt.managedbuild.tool.gnu.c.compiler.base.1443966672" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.base">
 								<option id="gnu.c.compiler.option.include.paths.1679107939" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/headers}&quot;"/>
+									<listOptionValue builtIn="false" value="/usr/include/mysql"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/CAN_Translator/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/CAN_Translator/include/socketcan}&quot;"/>
 								</option>
@@ -37,6 +38,10 @@
 							<tool id="cdt.managedbuild.tool.gnu.c.linker.base.557739185" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.base">
 								<option id="gnu.c.link.option.libs.158217213" name="Libraries (-l)" superClass="gnu.c.link.option.libs" valueType="libs">
 									<listOptionValue builtIn="false" value="pthread"/>
+									<listOptionValue builtIn="false" value="mysqlclient"/>
+								</option>
+								<option id="gnu.c.link.option.paths.1497638354" superClass="gnu.c.link.option.paths" valueType="libPaths">
+									<listOptionValue builtIn="false" value="/usr/lib"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.c.linker.input.1888399449" superClass="cdt.managedbuild.tool.gnu.c.linker.input">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>

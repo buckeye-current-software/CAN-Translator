@@ -6,6 +6,8 @@
  */
 #include "all.h"
 
+MYSQL *con;
+
 tree *msg_tree;
 tree *signal_tree;
 sem_t semaphore, can_semaphore;
@@ -38,51 +40,26 @@ void *txcanthread(int cansock) {
 	return NULL;
 }
 
-void *logthread()
-{
-	// Generate a default log file name before it is named. log1.csv, log2.csv, etc..
-	int logNum = 1;
-	char lognumstr[4];
-	sprintf(lognumstr, "%d", logNum);
-	strcpy(logString, "/home/cancorder/log");
-	//strcpy(logString, "log");
-	strcat(logString, lognumstr);
-	strcat(logString, ".csv");
-	while(access(logString, F_OK ) != -1)
-	{
-		logNum ++;
-		sprintf(lognumstr, "%d", logNum);
-		strcpy(logString, "/home/cancorder/log");
-		//strcpy(logString, "log");
-		strcat(logString, lognumstr);
-		strcat(logString, ".csv");
-	}
-	// Open the file with write permissions
-	f = fopen(logString, "w");
-	if(f == NULL)
-	{
-		printf("Error opening file!\n");
-		exit(1);
-	}
-	fprintf(f, "Runtime,System_Time,ErrorFrames,");			// Start inserting headers
-	explore_tree(msg_tree, insert_headers_messages);
-	explore_tree(signal_tree, insert_headers); 	// Generates headers once (can change to once in so many lines written)
-	fprintf(f, "\n");
-	while(keepRunning)
-	{
-		usleep(25000); // Will cause "memory leak" since it can write to the file everything this quickly. Won't crash program
-		data_log(signal_tree); // Datalog values in the signal tree
-		fflush(f);
-	}
-	fclose(f);
-	return NULL;
-}
-
 
 int main()
 {
 	int s;
+	printf("MySQL client version: %s\n", mysql_get_client_info());
 
+	con = mysql_init(NULL);
+
+	if(con == NULL)
+	{
+		fprintf(stderr, "%s\n", mysql_error(con));
+		exit(1);
+	}
+
+	if(mysql_real_connect(con, "localhost", "cancorder", "current", "CANCorder", 0, NULL, 0) == NULL)
+	{
+		fprintf(stderr, "%s\n", mysql_error(con));
+		mysql_close(con);
+		exit(1);
+	}
 	/*
 	struct sigaction sigIntHandler;
 	// Event handlers for use in debugging (Catch ctrl + C)
@@ -92,9 +69,9 @@ int main()
 	sigaction(SIGINT, &sigIntHandler, NULL);
 	 */
 	msg_tree = initialize_msg_avl();		// Initialize trees that will store parsed data from .dbc file
-	signal_tree = initialize_signal_avl();
+	//signal_tree = initialize_signal_avl();
 
-	char *fileName = "/home/cancorder/workspace/CAN_Translator/IOM2014.dbc";			// Your .dbc file
+	char *fileName = "/home/cancorder/workspace/CAN_Translator/RW3.dbc";			// Your .dbc file
 	//char *fileName = "IOM2014.dbc";
 	parseFile(fileName);	// Parse the file
 
@@ -106,11 +83,10 @@ int main()
 	sem_init(&can_semaphore, 0, 1);
 
 	pthread_t interceptor, translator;
-	pthread_t txthread, logging;
+	pthread_t txthread;
 	pthread_create(&interceptor, NULL, can_interceptor_thread, s);
 	pthread_create(&translator, NULL, translate_thread, NULL);
 	pthread_create(&txthread, NULL, txcanthread, s);
-	pthread_create(&logging, NULL, logthread, NULL);
 	sleep(2);
 
 	while(1)
