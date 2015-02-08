@@ -9,7 +9,7 @@
 MYSQL *con;
 
 tree *msg_tree;
-sem_t semaphore, can_semaphore;
+sem_t semaphore, can_semaphore, mutex;
 FILE *f;
 char logString[150];
 unsigned int errors = 0;
@@ -80,8 +80,9 @@ int main()
 		perror("Error while opening socket");
 		return -1;
 	}
-	sem_init(&semaphore, 0, 1);
+	sem_init(&mutex, 0, 1);
 	sem_init(&can_semaphore, 0, 1);
+	sem_init(&semaphore, 0, 0);
 
 	pthread_t interceptor, translator;
 	pthread_t txthread;
