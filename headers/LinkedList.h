@@ -15,9 +15,9 @@
 //Stores signals
 struct list_node
 {
-  struct signal_structure *signal;
-  struct list_node* next;
-  double value;
+	struct signal_structure *signal;
+	struct list_node* next;
+	double value;
 };
 
 struct can_message
