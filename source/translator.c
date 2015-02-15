@@ -21,11 +21,12 @@ union byteData
   double_t DOUBLE;
 } byteData;
 
-extern sem_t semaphore;
+extern sem_t semaphore, mutex;
 extern struct can_queue can_read_queue;
 struct can_queue translated_queue;
 extern int keepRunning;
 extern MYSQL * con;
+extern time_t startTime;
 char mysql_statement[200];
 
 void * translate_thread()
@@ -38,15 +39,17 @@ void * translate_thread()
 
 	int i;
 
-	while(keepRunning == 1)
+	while(1)
 	{
+		sem_wait(&semaphore);
+
 		if(can_read_queue.head != NULL)
 		{
 			// Add semaphore to lock down the queue while these two operations occur
-			sem_wait(&semaphore);
+			sem_wait(&mutex);
 			can_message_to_translate = can_read_queue.head;
 			can_read_queue.head = can_message_to_translate->next;
-			sem_post(&semaphore);
+			sem_post(&mutex);
 
 			frame = can_message_to_translate->frame;
 			frameLength = frame->len;
@@ -194,12 +197,12 @@ void * translate_thread()
 					translated_queue.tail = can_message_to_translate;
 				}
 				*/
-				sprintf(mysql_statement, "INSERT INTO CANTime values (1, '%s', '%s',  %f)",
+				sprintf(mysql_statement, "INSERT INTO CANTime values ('%f', '%s', '%s',  %f)", difftime(time(0),startTime),
 						head_signal->signal->id, head_signal->signal->unit, head_signal->value);
 
 				if(mysql_query(con, mysql_statement) != 0)
 				{
-				      printf("MySQL query error : %s\n", mysql_error(con));
+					  printf("MySQL query error : %s\n", mysql_error(con));
 				}
 				fflush(stdout);
 				/*

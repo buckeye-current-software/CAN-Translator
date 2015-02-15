@@ -14,7 +14,7 @@ int keepRunning = 1;
 
 struct can_queue can_read_queue;
 
-extern sem_t semaphore;
+extern sem_t semaphore, mutex;
 
 int * can_interceptor_thread(int s)
 {
@@ -105,7 +105,7 @@ int * can_interceptor_thread(int s)
 					msg->frame = &frame;
 					msg->next = NULL;
 					msg->can_signals = result_node->list;
-					sem_wait(&semaphore);
+					sem_wait(&mutex);
 					if(can_read_queue.head == NULL)
 					{
 						can_read_queue.head = msg;
@@ -115,6 +115,7 @@ int * can_interceptor_thread(int s)
 					{
 						can_read_queue.tail->next = msg;
 					}
+					sem_post(&mutex);
 					sem_post(&semaphore);
 				}
 			}

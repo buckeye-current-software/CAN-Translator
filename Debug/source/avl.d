@@ -19,8 +19,6 @@ source/avl.d: ../source/avl.c \
  /home/cancorder/workspace/CAN_Translator/headers/MessageAVL.h \
  /home/cancorder/workspace/CAN_Translator/headers/LinkedList.h \
  /home/cancorder/workspace/CAN_Translator/headers/signal.h \
- /home/cancorder/workspace/CAN_Translator/headers/SignalAVL.h \
- /home/cancorder/workspace/CAN_Translator/headers/datalogger.h \
  /home/cancorder/workspace/CAN_Translator/headers/translator.h \
  /home/cancorder/workspace/CAN_Translator/headers/syslog.h \
  /home/cancorder/workspace/CAN_Translator/headers/can_interceptor.h
@@ -76,10 +74,6 @@ source/avl.d: ../source/avl.c \
 /home/cancorder/workspace/CAN_Translator/headers/LinkedList.h:
 
 /home/cancorder/workspace/CAN_Translator/headers/signal.h:
-
-/home/cancorder/workspace/CAN_Translator/headers/SignalAVL.h:
-
-/home/cancorder/workspace/CAN_Translator/headers/datalogger.h:
 
 /home/cancorder/workspace/CAN_Translator/headers/translator.h:
 

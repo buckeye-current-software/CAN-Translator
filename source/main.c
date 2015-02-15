@@ -9,12 +9,12 @@
 MYSQL *con;
 
 tree *msg_tree;
-tree *signal_tree;
-sem_t semaphore, can_semaphore;
+sem_t semaphore, can_semaphore, mutex;
 FILE *f;
 char logString[150];
 unsigned int errors = 0;
 extern int keepRunning;
+time_t startTime;
 
 void my_handler(int dummy) {
     keepRunning = 0;
@@ -43,6 +43,7 @@ void *txcanthread(int cansock) {
 
 int main()
 {
+	startTime = time(0);
 	int s;
 	printf("MySQL client version: %s\n", mysql_get_client_info());
 
@@ -71,7 +72,7 @@ int main()
 	msg_tree = initialize_msg_avl();		// Initialize trees that will store parsed data from .dbc file
 	//signal_tree = initialize_signal_avl();
 
-	char *fileName = "/home/cancorder/workspace/CAN_Translator/RW3.dbc";			// Your .dbc file
+	char *fileName = "RW3.dbc";			// Your .dbc file
 	//char *fileName = "IOM2014.dbc";
 	parseFile(fileName);	// Parse the file
 
@@ -79,20 +80,18 @@ int main()
 		perror("Error while opening socket");
 		return -1;
 	}
-	sem_init(&semaphore, 0, 1);
+	sem_init(&mutex, 0, 1);
 	sem_init(&can_semaphore, 0, 1);
+	sem_init(&semaphore, 0, 0);
 
 	pthread_t interceptor, translator;
 	pthread_t txthread;
 	pthread_create(&interceptor, NULL, can_interceptor_thread, s);
 	pthread_create(&translator, NULL, translate_thread, NULL);
 	pthread_create(&txthread, NULL, txcanthread, s);
-	sleep(2);
-
-	while(1)
-	{
-		//Do nothing
-	}
+	pthread_join(&interceptor, NULL);
+	pthread_join(&translator, NULL);
+	pthread_join(&txthread, NULL);
 
 	return 0;
 }

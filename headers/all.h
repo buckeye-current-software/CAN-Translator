@@ -50,8 +50,6 @@
 #include "parser.h"
 #include "avl.h"
 #include "MessageAVL.h"
-#include "SignalAVL.h"
-#include "datalogger.h"
 #include "translator.h"
 #include "LinkedList.h"
 #include "syslog.h"
