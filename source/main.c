@@ -9,7 +9,7 @@
 MYSQL *con;
 
 tree *msg_tree;
-sem_t semaphore, can_semaphore, mutex;
+sem_t semaphore, can_semaphore, mutex, main_sem;
 FILE *f;
 char logString[150];
 unsigned int errors = 0;
@@ -83,15 +83,14 @@ int main()
 	sem_init(&mutex, 0, 1);
 	sem_init(&can_semaphore, 0, 1);
 	sem_init(&semaphore, 0, 0);
+	sem_init(&main_sem, 0, 0);
 
 	pthread_t interceptor, translator;
 	pthread_t txthread;
 	pthread_create(&interceptor, NULL, can_interceptor_thread, s);
 	pthread_create(&translator, NULL, translate_thread, NULL);
 	pthread_create(&txthread, NULL, txcanthread, s);
-	pthread_join(&interceptor, NULL);
-	pthread_join(&translator, NULL);
-	pthread_join(&txthread, NULL);
+	sem_wait(&main_sem);
 
 	return 0;
 }
