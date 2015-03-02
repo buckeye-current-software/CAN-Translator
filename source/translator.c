@@ -189,9 +189,9 @@ void * translate_thread()
 				}
 
 				rewind(insertion_file);
-				double time = 0.0;	// Will change as needed
+				double latest_time = difftime(time(0),startTime);
 				double value = head_signal->value;
-				fwrite(&time, sizeof time, 1, insertion_file);	
+				fwrite(&latest_time, sizeof latest_time, 1, insertion_file);	
 				fwrite(&value, sizeof value, 1, insertion_file);
 				fclose(insertion_file);
 				head_signal = head_signal->next;
