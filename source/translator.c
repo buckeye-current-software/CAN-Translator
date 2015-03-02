@@ -196,6 +196,7 @@ void * translate_thread()
 				fclose(insertion_file);
 				head_signal = head_signal->next;
 			}
+			free(can_message_to_translate->frame);
 			free(can_message_to_translate);
 		}
 	}

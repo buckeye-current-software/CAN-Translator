@@ -73,6 +73,7 @@ int * can_interceptor_thread(int s)
 			if (nbytes < 0)
 			{
 				perror("Close socket?");
+				printf("Closing socket\n");
 				close(s);
 
 				// DETERMINE WAY TO HANDLE CLOSING OTHER THREADS...
@@ -116,6 +117,10 @@ int * can_interceptor_thread(int s)
 					{
 						can_read_queue.tail->next = msg;
 						can_read_queue.tail = can_read_queue.tail->next;
+						if(can_read_queue.tail == NULL)
+						{
+							printf("Tail is null\n");
+						}
 					}
 					sem_post(&mutex);
 					sem_post(&semaphore);
