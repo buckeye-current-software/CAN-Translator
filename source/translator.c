@@ -27,7 +27,7 @@ struct can_queue translated_queue;
 extern int keepRunning;
 extern MYSQL * con;
 extern time_t startTime;
-char mysql_statement[200];
+char mysql_statement[2000], query[200];
 
 void * translate_thread()
 {
@@ -45,6 +45,8 @@ void * translate_thread()
 
 		if(can_read_queue.head != NULL)
 		{
+			sprintf(mysql_statement, "INSERT INTO CANTime (Time, CAN_Message, Unit, Value) values ");
+
 			// Add semaphore to lock down the queue while these two operations occur
 			sem_wait(&mutex);
 			can_message_to_translate = can_read_queue.head;
@@ -65,7 +67,6 @@ void * translate_thread()
 			{
 				memcpy(&frame->data, &origFrameData[0], frameLength);
 				memcpy(&byteData.U64, &frame->data[0], frameLength);
-
 
 				//sig_node = head_signal->signal; //REMOVE ME AND REPLACE sig_node
 
@@ -172,6 +173,11 @@ void * translate_thread()
 						//
 					}
 					head_signal->value = (double)byteData.FLOAT;
+					if(head_signal->value != head_signal->value)
+					{
+						// The float is NaN. Set to 0.
+						head_signal->value = 0;
+					}
 				}
 				else //Double
 				{
@@ -197,19 +203,21 @@ void * translate_thread()
 					translated_queue.tail = can_message_to_translate;
 				}
 				*/
-				sprintf(mysql_statement, "INSERT INTO CANTime values ('%f', '%s', '%s',  %f)", difftime(time(0),startTime),
-						head_signal->signal->id, head_signal->signal->unit, head_signal->value);
 
-				if(mysql_query(con, mysql_statement) != 0)
-				{
-					  printf("MySQL query error : %s\n", mysql_error(con));
-				}
-				fflush(stdout);
-				/*
-				 * Temporary code
-				 */
+				sprintf(query, "('%f', '%s', '%s',  %f),", difftime(time(0),startTime),
+										head_signal->signal->id, head_signal->signal->unit, head_signal->value);
+				strcat(mysql_statement, query);
+
 				head_signal = head_signal->next;
 			}
+			free(can_message_to_translate);
+			mysql_statement[strlen(mysql_statement)-1] = ' ';
+			strcat(mysql_statement, " ON DUPLICATE KEY UPDATE Time=VALUES(Time), Value=VALUES(Value)");
+			if(mysql_query(con, mysql_statement) != 0)
+			{
+				  printf("MySQL query error : %s\n", mysql_error(con));
+			}
+
 		}
 	}
 }
