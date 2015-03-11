@@ -114,6 +114,7 @@ int * can_interceptor_thread(int s)
 					else
 					{
 						can_read_queue.tail->next = msg;
+						can_read_queue.tail = can_read_queue.tail->next;
 					}
 					sem_post(&mutex);
 					sem_post(&semaphore);
