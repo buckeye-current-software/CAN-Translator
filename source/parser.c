@@ -292,7 +292,7 @@ void parseFile(char *fileName)
 	msg.list = signal_linked_list;
 	insert_elmt(msg_tree, &msg, sizeof(struct message_node));
 
-	fprintf(stdout, "Message Tree: \n"); // Used for debugging. Make sure everything is in the tree
-	print_tree(msg_tree);
+	//fprintf(stdout, "Message Tree: \n"); // Used for debugging. Make sure everything is in the tree
+	//print_tree(msg_tree);
 	fclose(file);
 }
