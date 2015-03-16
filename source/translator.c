@@ -40,10 +40,6 @@ void * translate_thread()
 	int i;
 	FILE * insertion_file;
 
-	if(chdir("data") == -1)
-	{
-		printf("Did not change directoy!\n");
-	}
 	while(1)
 	{
 		sem_wait(&semaphore);
@@ -59,7 +55,7 @@ void * translate_thread()
 		if(can_read_queue.head != NULL)
 		{
 			// Used to MySQL data entry
-			sprintf(mysql_statement, "INSERT INTO CANTime (Time, CAN_Message, Unit, Value) values ");
+			//sprintf(mysql_statement, "INSERT INTO CANTime (Time, CAN_Message, Unit, Value) values ");
 
 
 			// Add semaphore to lock down the queue while these two operations occur
@@ -85,7 +81,7 @@ void * translate_thread()
 
 				// Used for manual file IO entry
 
-				insertion_file = fopen(head_signal->signal->id, "w");
+				insertion_file = fopen(head_signal->signal->id, "r+");
 				if(insertion_file == NULL)
 				{
 					printf("FAILED TO OPEN FILE!\n");
@@ -219,6 +215,7 @@ void * translate_thread()
 				*/
 				//fprintf(insertion_file, "%f\n%s\n%s\n%f", difftime(time(0),startTime), head_signal->signal->id,
 						//head_signal->signal->unit, head_signal->value);
+				rewind(insertion_file);
 				fprintf(insertion_file, "%f\n%f", difftime(time(0),startTime), head_signal->value);
 				fclose(insertion_file);
 				head_signal = head_signal->next;
