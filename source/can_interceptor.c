@@ -8,7 +8,6 @@
 #include "all.h"
 
 tree *msg_tree;
-tree *signal_tree;
 const int canfd_on = 1;
 int keepRunning = 1;
 
@@ -123,15 +122,8 @@ int * can_interceptor_thread(int s)
 		}
 	}
 	close(s);
-	/*
-	pthread_join(txthread, NULL); // We want to close the threads before deleting the trees they are accessing
-	pthread_join(logging, NULL);
-	pthread_join(syncthread, NULL);
-	*/
-	delete_tree(signal_tree);
+
 	delete_tree(msg_tree);
-	free(signal_tree);
-	signal_tree = NULL;
 	free(msg_tree);
 	msg_tree = NULL;
 	return 0;

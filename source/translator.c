@@ -24,8 +24,6 @@ union byteData
 extern sem_t semaphore, mutex;
 extern struct can_queue can_read_queue;
 struct can_queue translated_queue;
-extern int keepRunning;
-extern MYSQL * con;
 extern time_t startTime;
 char mysql_statement[2000], query[200];
 
@@ -43,21 +41,9 @@ void * translate_thread()
 	while(1)
 	{
 		sem_wait(&semaphore);
-		/*
-		if(inserts == 0)
-		{
-			if(mysql_query(con, "START TRANSACTION;") != 0)
-			{
-				  printf("MySQL query error : %s\n", mysql_error(con));
-			}
-		}
-		*/
+
 		if(can_read_queue.head != NULL)
 		{
-			// Used to MySQL data entry
-			//sprintf(mysql_statement, "INSERT INTO CANTime (Time, CAN_Message, Unit, Value) values ");
-
-
 			// Add semaphore to lock down the queue while these two operations occur
 			sem_wait(&mutex);
 			can_message_to_translate = can_read_queue.head;
@@ -69,7 +55,6 @@ void * translate_thread()
 			__u8 tempArray[frameLength];
 			__u8 origFrameData[frameLength];
 
-			//Why frame->data[0]
 			memcpy(&origFrameData, frame->data, frameLength);
 
 			struct list_node* head_signal = can_message_to_translate->can_signals->head;
@@ -80,7 +65,6 @@ void * translate_thread()
 				memcpy(&byteData.U64, &frame->data[0], frameLength);
 
 				// Used for manual file IO entry
-
 				insertion_file = fopen(head_signal->signal->id, "r+");
 				if(insertion_file == NULL)
 				{
@@ -107,9 +91,6 @@ void * translate_thread()
 					bitmask = (bitmask | (1L << i));
 				}
 				byteData.U64 = byteData.U64 & bitmask;
-
-				//signal->dataType = sig_node->signal->dataType; // Due to signals.dataType being different between msg_tree and sig_tree
-
 
 				sem_wait(&semaphore);
 				// Determine how the translated data should be interpreted (int, float, double, etc..)
@@ -207,41 +188,13 @@ void * translate_thread()
 					signal = head_signal->next->signal;
 				}
 
-				// The following two lines are for MySQL data storage method
-				/*
-				sprintf(query, "('%f', '%s', '%s',  %f),", difftime(time(0),startTime),
-										head_signal->signal->id, head_signal->signal->unit, head_signal->value);
-				strcat(mysql_statement, query);
-				*/
-				//fprintf(insertion_file, "%f\n%s\n%s\n%f", difftime(time(0),startTime), head_signal->signal->id,
-						//head_signal->signal->unit, head_signal->value);
 				rewind(insertion_file);
 				fprintf(insertion_file, "%f\n%f", difftime(time(0),startTime), head_signal->value);
 				fclose(insertion_file);
+
 				head_signal = head_signal->next;
 			}
 			free(can_message_to_translate);
-			/*
-			mysql_statement[strlen(mysql_statement)-1] = ' ';
-			strcat(mysql_statement, " ON DUPLICATE KEY UPDATE Time=VALUES(Time), Value=VALUES(Value)");
-			if(mysql_query(con, mysql_statement) != 0)
-			{
-				  printf("MySQL query error : %s\n", mysql_error(con));
-			}
-			/*else
-			{
-				inserts++;
-				if(inserts > 100)
-				{
-					if(mysql_query(con, "COMMIT;") != 0)
-					{
-						  printf("MySQL query error : %s\n", mysql_error(con));
-					}
-					printf("Committed\n");
-					inserts = 0;
-				}
-			}*/
-
 		}
 	}
 }

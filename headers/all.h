@@ -30,7 +30,6 @@
 #include <signal.h>
 
 #include <my_global.h>
-#include <mysql.h>
 
 
 #include <sys/socket.h>
@@ -54,7 +53,6 @@
 #include "LinkedList.h"
 #include "syslog.h"
 #include "signal.h"
-
 #include "can_interceptor.h"
 
 //#include <mysql/mysql.h>

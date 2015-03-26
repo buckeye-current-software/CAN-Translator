@@ -6,8 +6,6 @@
  */
 #include "all.h"
 
-MYSQL *con;
-
 tree *msg_tree;
 sem_t semaphore, can_semaphore, mutex, main_sem;
 FILE *f;
@@ -45,35 +43,10 @@ int main()
 {
 	startTime = time(0);
 	int s;
-	printf("MySQL client version: %s\n", mysql_get_client_info());
 
-	con = mysql_init(NULL);
-
-	if(con == NULL)
-	{
-		fprintf(stderr, "%s\n", mysql_error(con));
-		exit(1);
-	}
-
-	if(mysql_real_connect(con, "localhost", "cancorder", "current", "CANCorder", 0, NULL, 0) == NULL)
-	{
-		fprintf(stderr, "%s\n", mysql_error(con));
-		mysql_close(con);
-		exit(1);
-	}
-	/*
-	struct sigaction sigIntHandler;
-	// Event handlers for use in debugging (Catch ctrl + C)
-	sigIntHandler.sa_handler = my_handler;
-	sigemptyset(&sigIntHandler.sa_mask);
-	sigIntHandler.sa_flags = 0;
-	sigaction(SIGINT, &sigIntHandler, NULL);
-	 */
 	msg_tree = initialize_msg_avl();		// Initialize trees that will store parsed data from .dbc file
-	//signal_tree = initialize_signal_avl();
 
 	char *fileName = "RW3.dbc";			// Your .dbc file
-	//char *fileName = "IOM2014.dbc";
 	parseFile(fileName);	// Parse the file
 
 	if((s = socket(PF_CAN, SOCK_RAW, CAN_RAW)) < 0) {

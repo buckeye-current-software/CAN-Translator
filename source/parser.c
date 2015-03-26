@@ -275,8 +275,7 @@ void parseFile(char *fileName)
 				nameIndex++;
 			}
 			tmp[nameIndex] = '\0';
-			//strcpy(sig_node.key, tmp);
-			//signode_to_edit = get_signal(signal_tree, &sig_node, sizeof(struct signal_node));
+
 			message = get_message(msg_tree, &tempNode,sizeof(struct message_node));
 			signode_to_edit = message->list->head;
 			while(strcmp(signode_to_edit->signal->id,tmp) != 0) // This is not right.

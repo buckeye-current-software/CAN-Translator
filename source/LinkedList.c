@@ -1,34 +1,7 @@
 
 #include "all.h"
 
-// EXAMPLE OF A LINKEDLIST
-/*
-int main(void)
-{
-  struct my_list*  mt = NULL;
- 
-  mt = list_new();
-  list_add_element(mt, 1);
-  list_add_element(mt, 2);
-  list_add_element(mt, 3);
-  list_add_element(mt, 4); 
-   
-  list_print(mt);
- 
-  list_remove_element(mt);
-  list_print(mt);
- 
-  list_free(mt);    always remember to free() the malloc()ed memory
-  free(mt);         free() if list is kept separate from free()ing the structure, I think its a good design 
-  mt = NULL;       after free() always set that pointer to NULL, C will run havon on you if you try to use a dangling pointer 
- 
-  list_print(mt);
- 
-  return 0;
-}
-*/
- 
- 
+
 /* Will always return the pointer to my_list */
 struct signal_structure* list_add_element(struct my_list* s, struct signal_structure* sig)
 {
