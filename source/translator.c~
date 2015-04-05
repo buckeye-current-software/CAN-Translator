@@ -189,9 +189,16 @@ void * translate_thread()
 				}
 
 				rewind(insertion_file);
+				double new_time = difftime(time(0), startTime);
+				double new_value = head_signal->value;
+				char rep[sizeof new_time];
+				memcpy(&rep, &new_time, sizeof new_time);
+				fwrite(rep, sizeof new_time, 1, insertion_file);
+				memcpy(&rep, &new_value, sizeof new_value);
+
 				char rep[16];
 				sprintf(rep, "%f%f", difftime(time(0), startTime), head_signal->value);
-				fwrite(rep, 16, 1, insertion_file);				
+				fwrite(rep, sizeof rep, 1, insertion_file);				
 				//fprintf(insertion_file, "%f\n%f", difftime(time(0),startTime), head_signal->value);
 				fclose(insertion_file);
 

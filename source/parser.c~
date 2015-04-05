@@ -248,7 +248,7 @@ void parseFile(char *fileName)
 			list_add_element(signal_linked_list, &sig);
 
 			// Create file for signal for data storage
-			createFile = fopen(sig.id, "wb");
+			createFile = fopen(sig.id, "b");
 			fclose(createFile);
 		}
 
