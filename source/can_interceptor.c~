@@ -102,7 +102,7 @@ int * can_interceptor_thread(int s)
 					// QUEUE CODE HERE...
 					struct can_message *msg = malloc(sizeof(struct can_message));
 					//msg->frame = &frame;
-					msg->frame = malloc(sizeof(struct canfd_frame));
+					
 					memcpy(msg->frame, &frame, sizeof(frame));
 					msg->next = NULL;
 					msg->can_signals = result_node->list;

@@ -29,9 +29,6 @@
 #include <net/if.h>
 #include <signal.h>
 
-#include <my_global.h>
-
-
 #include <sys/socket.h>
 #include <linux/netlink.h>
 
