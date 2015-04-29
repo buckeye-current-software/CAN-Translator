@@ -189,7 +189,10 @@ void * translate_thread()
 				}
 
 				rewind(insertion_file);
-				fprintf(insertion_file, "%f\n%f", difftime(time(0),startTime), head_signal->value);
+				double time = 0.0;	// Will change as needed
+				double value = head_signal->value;
+				fwrite(&time, sizeof time, 1, insertion_file);	
+				fwrite(&value, sizeof value, 1, insertion_file);
 				fclose(insertion_file);
 				head_signal = head_signal->next;
 			}

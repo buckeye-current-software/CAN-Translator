@@ -33,7 +33,7 @@ void * translate_thread()
 	struct signal_structure * signal;
 	uint8_t frameLength;
 	uint64_t bitmask = 0;
-	struct canfd_frame frame;
+	struct canfd_frame * frame;
 
 	int i;
 	FILE * insertion_file;
@@ -50,19 +50,19 @@ void * translate_thread()
 			can_read_queue.head = can_message_to_translate->next;
 			sem_post(&mutex);
 
-			frame = can_message_to_translate.frame;
-			frameLength = frame.len;
+			frame = can_message_to_translate->frame;
+			frameLength = frame->len;
 			__u8 tempArray[frameLength];
 			__u8 origFrameData[frameLength];
 
-			memcpy(&origFrameData, frame.data, frameLength);
+			memcpy(&origFrameData, frame->data, frameLength);
 
 			struct list_node* head_signal = can_message_to_translate->can_signals->head;
 			signal = head_signal->signal;
 			while(head_signal != NULL)
 			{
-				memcpy(&frame.data, &origFrameData[0], frameLength);
-				memcpy(&byteData.U64, &frame.data[0], frameLength);
+				memcpy(&frame->data, &origFrameData[0], frameLength);
+				memcpy(&byteData.U64, &frame->data[0], frameLength);
 
 				// Used for manual file IO entry
 				insertion_file = fopen(head_signal->signal->id, "r+");
@@ -78,12 +78,12 @@ void * translate_thread()
 					//Reverse the byte array or start index at end and decrement
 					for(i = 0; i < 8; i++)
 					{
-						tempArray[(frameLength-1)-i] = frame.data[i];
+						tempArray[(frameLength-1)-i] = frame->data[i];
 					}
-					memcpy(&frame.data,&tempArray[0], frameLength);
+					memcpy(&frame->data,&tempArray[0], frameLength);
 				}
 
-				memcpy(&byteData.U64, &frame.data[0], frameLength); // Obtain data and store in union
+				memcpy(&byteData.U64, &frame->data[0], frameLength); // Obtain data and store in union
 				byteData.U64 = byteData.U64 >> signal->startBit; // Remove data that doesn't correspond to the signal we are looking at
 				//Create bitmask
 				bitmask = 0;
@@ -191,7 +191,6 @@ void * translate_thread()
 				rewind(insertion_file);
 				fprintf(insertion_file, "%f\n%f", difftime(time(0),startTime), head_signal->value);
 				fclose(insertion_file);
-				printf("WROTE\n");
 				head_signal = head_signal->next;
 			}
 			free(can_message_to_translate);
