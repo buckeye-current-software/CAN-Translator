@@ -65,7 +65,7 @@ void * translate_thread()
 				memcpy(&byteData.U64, &frame->data[0], frameLength);
 
 				// Used for manual file IO entry
-				insertion_file = fopen(head_signal->signal->id, "r+");
+				insertion_file = fopen(head_signal->signal->id, "b");
 				if(insertion_file == NULL)
 				{
 					printf("FAILED TO OPEN FILE!\n");
