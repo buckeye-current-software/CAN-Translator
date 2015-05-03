@@ -27,7 +27,7 @@ int * can_interceptor_thread(int s)
 	struct sockaddr_can addr;
 	struct ifreq ifr;
 
-	strcpy(ifr.ifr_name, "vcan0" );
+	strcpy(ifr.ifr_name, "can0" );
 	ioctl(s, SIOCGIFINDEX, &ifr);
 	addr.can_family = AF_CAN;
 	addr.can_ifindex = ifr.ifr_ifindex;
