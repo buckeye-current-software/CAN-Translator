@@ -8,7 +8,6 @@
 #include "all.h"
 
 tree *msg_tree;
-tree *signal_tree;
 const int canfd_on = 1;
 int keepRunning = 1;
 
@@ -28,7 +27,7 @@ int * can_interceptor_thread(int s)
 	struct sockaddr_can addr;
 	struct ifreq ifr;
 
-	strcpy(ifr.ifr_name, "vcan0" );
+	strcpy(ifr.ifr_name, "can0" );
 	ioctl(s, SIOCGIFINDEX, &ifr);
 	addr.can_family = AF_CAN;
 	addr.can_ifindex = ifr.ifr_ifindex;
@@ -74,6 +73,7 @@ int * can_interceptor_thread(int s)
 			if (nbytes < 0)
 			{
 				perror("Close socket?");
+				printf("Closing socket\n");
 				close(s);
 
 				// DETERMINE WAY TO HANDLE CLOSING OTHER THREADS...
@@ -102,7 +102,9 @@ int * can_interceptor_thread(int s)
 					// Add message node pointer to queue that allows another thread to find it quickly to translate.
 					// QUEUE CODE HERE...
 					struct can_message *msg = malloc(sizeof(struct can_message));
-					msg->frame = &frame;
+					//msg->frame = &frame;
+					msg->frame = malloc(sizeof(struct canfd_frame));
+					memcpy(msg->frame, &frame, sizeof(frame));
 					msg->next = NULL;
 					msg->can_signals = result_node->list;
 					sem_wait(&mutex);
@@ -115,6 +117,10 @@ int * can_interceptor_thread(int s)
 					{
 						can_read_queue.tail->next = msg;
 						can_read_queue.tail = can_read_queue.tail->next;
+						if(can_read_queue.tail == NULL)
+						{
+							printf("Tail is null\n");
+						}
 					}
 					sem_post(&mutex);
 					sem_post(&semaphore);
@@ -123,15 +129,8 @@ int * can_interceptor_thread(int s)
 		}
 	}
 	close(s);
-	/*
-	pthread_join(txthread, NULL); // We want to close the threads before deleting the trees they are accessing
-	pthread_join(logging, NULL);
-	pthread_join(syncthread, NULL);
-	*/
-	delete_tree(signal_tree);
+
 	delete_tree(msg_tree);
-	free(signal_tree);
-	signal_tree = NULL;
 	free(msg_tree);
 	msg_tree = NULL;
 	return 0;

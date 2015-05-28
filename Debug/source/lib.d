@@ -21,6 +21,11 @@ source/lib.d: ../source/lib.c \
  /home/cancorder/workspace/CAN_Translator/headers/signal.h \
  /home/cancorder/workspace/CAN_Translator/headers/translator.h \
  /home/cancorder/workspace/CAN_Translator/headers/syslog.h \
+ /home/cancorder/workspace/CAN_Translator/headers/hiredis/hiredis.h \
+ /home/cancorder/workspace/CAN_Translator/headers/hiredis/read.h \
+ /home/cancorder/workspace/CAN_Translator/headers/hiredis/sds.h \
+ /home/cancorder/workspace/CAN_Translator/headers/hiredis/async.h \
+ /home/cancorder/workspace/CAN_Translator/headers/hiredis/hiredis.h \
  /home/cancorder/workspace/CAN_Translator/headers/can_interceptor.h
 
 /home/cancorder/workspace/CAN_Translator/headers/all.h:
@@ -78,5 +83,15 @@ source/lib.d: ../source/lib.c \
 /home/cancorder/workspace/CAN_Translator/headers/translator.h:
 
 /home/cancorder/workspace/CAN_Translator/headers/syslog.h:
+
+/home/cancorder/workspace/CAN_Translator/headers/hiredis/hiredis.h:
+
+/home/cancorder/workspace/CAN_Translator/headers/hiredis/read.h:
+
+/home/cancorder/workspace/CAN_Translator/headers/hiredis/sds.h:
+
+/home/cancorder/workspace/CAN_Translator/headers/hiredis/async.h:
+
+/home/cancorder/workspace/CAN_Translator/headers/hiredis/hiredis.h:
 
 /home/cancorder/workspace/CAN_Translator/headers/can_interceptor.h:

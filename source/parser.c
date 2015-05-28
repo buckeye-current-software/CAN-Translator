@@ -10,8 +10,9 @@ int maxSignalSize;
 
 void parseFile(char *fileName)
 {
+
 	maxSignalSize = 0;
-	FILE *file;
+	FILE *file, *createFile;
 	/* Open file handler using fileName in read mode */
 	file = fopen(fileName, "r");
 	if (file == NULL)
@@ -20,6 +21,11 @@ void parseFile(char *fileName)
 		exit(1);		
 	}
 
+	// Change directory to the "data" folder inside the CAN Translator project folder
+	if(chdir("data") == -1)
+	{
+		printf("Did not change directoy!\n");
+	}
 	char buf[BUFSIZ], messageID[10], messageName[50], tmp[50], startBit[3], length[3], byteOrder[2], dataType[2];
 	int index, index2 = 0, tmpLength; 							// Variables used to store signalID's into smaller arrays
 	int first_insert_skipped = 0;     // Skips inserting the first message since no signals have
@@ -241,7 +247,9 @@ void parseFile(char *fileName)
 			// Add signal to linked_list
 			list_add_element(signal_linked_list, &sig);
 
-			// Add signal to signal node, add signal node to AVL tree
+			// Create file for signal for data storage
+			createFile = fopen(sig.id, "w+b");
+			fclose(createFile);
 		}
 
 		// This signifies that the data type for a signal stored earlier is wrong
@@ -267,8 +275,7 @@ void parseFile(char *fileName)
 				nameIndex++;
 			}
 			tmp[nameIndex] = '\0';
-			//strcpy(sig_node.key, tmp);
-			//signode_to_edit = get_signal(signal_tree, &sig_node, sizeof(struct signal_node));
+
 			message = get_message(msg_tree, &tempNode,sizeof(struct message_node));
 			signode_to_edit = message->list->head;
 			while(strcmp(signode_to_edit->signal->id,tmp) != 0) // This is not right.
@@ -292,7 +299,7 @@ void parseFile(char *fileName)
 	msg.list = signal_linked_list;
 	insert_elmt(msg_tree, &msg, sizeof(struct message_node));
 
-	fprintf(stdout, "Message Tree: \n"); // Used for debugging. Make sure everything is in the tree
-	print_tree(msg_tree);
+	//fprintf(stdout, "Message Tree: \n"); // Used for debugging. Make sure everything is in the tree
+	//print_tree(msg_tree);
 	fclose(file);
 }

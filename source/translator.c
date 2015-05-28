@@ -24,8 +24,6 @@ union byteData
 extern sem_t semaphore, mutex;
 extern struct can_queue can_read_queue;
 struct can_queue translated_queue;
-extern int keepRunning;
-extern MYSQL * con;
 extern time_t startTime;
 char mysql_statement[2000], query[200];
 
@@ -38,6 +36,7 @@ void * translate_thread()
 	struct canfd_frame * frame;
 
 	int i;
+	FILE * insertion_file;
 
 	while(1)
 	{
@@ -45,8 +44,6 @@ void * translate_thread()
 
 		if(can_read_queue.head != NULL)
 		{
-			sprintf(mysql_statement, "INSERT INTO CANTime (Time, CAN_Message, Unit, Value) values ");
-
 			// Add semaphore to lock down the queue while these two operations occur
 			sem_wait(&mutex);
 			can_message_to_translate = can_read_queue.head;
@@ -58,7 +55,6 @@ void * translate_thread()
 			__u8 tempArray[frameLength];
 			__u8 origFrameData[frameLength];
 
-			//Why frame->data[0]
 			memcpy(&origFrameData, frame->data, frameLength);
 
 			struct list_node* head_signal = can_message_to_translate->can_signals->head;
@@ -68,8 +64,12 @@ void * translate_thread()
 				memcpy(&frame->data, &origFrameData[0], frameLength);
 				memcpy(&byteData.U64, &frame->data[0], frameLength);
 
-				//sig_node = head_signal->signal; //REMOVE ME AND REPLACE sig_node
-
+				// Used for manual file IO entry
+				insertion_file = fopen(head_signal->signal->id, "r+b");
+				if(insertion_file == NULL)
+				{
+					printf("FAILED TO OPEN FILE!\n");
+				}
 
 				if(signal->byteOrder == 0) // If little endian, the data needs reversed
 				{
@@ -91,9 +91,6 @@ void * translate_thread()
 					bitmask = (bitmask | (1L << i));
 				}
 				byteData.U64 = byteData.U64 & bitmask;
-
-				//signal->dataType = sig_node->signal->dataType; // Due to signals.dataType being different between msg_tree and sig_tree
-
 
 				sem_wait(&semaphore);
 				// Determine how the translated data should be interpreted (int, float, double, etc..)
@@ -191,33 +188,16 @@ void * translate_thread()
 					signal = head_signal->next->signal;
 				}
 
-				/*
-				if(translated_queue.head == NULL)
-				{
-					translated_queue.head = can_message_to_translate;
-					translated_queue.tail = can_message_to_translate;
-				}
-				else
-				{
-					translated_queue.tail->next = can_message_to_translate;
-					translated_queue.tail = can_message_to_translate;
-				}
-				*/
-
-				sprintf(query, "('%f', '%s', '%s',  %f),", difftime(time(0),startTime),
-										head_signal->signal->id, head_signal->signal->unit, head_signal->value);
-				strcat(mysql_statement, query);
-
+				rewind(insertion_file);
+				double latest_time = difftime(time(0),startTime);
+				double value = head_signal->value;
+				fwrite(&latest_time, sizeof latest_time, 1, insertion_file);	
+				fwrite(&value, sizeof value, 1, insertion_file);
+				fclose(insertion_file);
 				head_signal = head_signal->next;
 			}
+			free(can_message_to_translate->frame);
 			free(can_message_to_translate);
-			mysql_statement[strlen(mysql_statement)-1] = ' ';
-			strcat(mysql_statement, " ON DUPLICATE KEY UPDATE Time=VALUES(Time), Value=VALUES(Value)");
-			if(mysql_query(con, mysql_statement) != 0)
-			{
-				  printf("MySQL query error : %s\n", mysql_error(con));
-			}
-
 		}
 	}
 }
